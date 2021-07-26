@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, url_for
 from flask import jsonify
-import pickle
+# from connection import get_connection, get_s3_connection
 #import base64
 #import cv2
 import joblib
@@ -22,10 +22,17 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
-@app.route('/predict', methods=['post', 'get'])
+@app.route('/predict', methods=['post']) # 'get'
 def make_prediction():
-    image_file = request.files['image']
-    if not image_file: return render_template('index.html', label="no files")
+    # s3_connection = get_s3_connection()
+    image_file = request.files['image1']
+    # image_file = request.form.get('image1')
+    # image_file = request.args['image1'] #file_name
+    if not image_file:
+        #return render_template('index.html', label="no files")
+        return jsonify({
+            "label": 'error',
+        })
 
     pil_img = Image.open(image_file)
 
@@ -38,7 +45,7 @@ def make_prediction():
 
     pil_img = pil_img.reshape((1, IMAGE_HEIGHT, IMAGE_WIDTH, IMAGE_CHANNELS))
 
-    y_predict = model.predict(pil_img) #### model load 못해서 predict가 안됨. => h5파일 저장해서 해결
+    y_predict = model.predict(pil_img)
     # print(y_predict)
 
     label = label_dict[y_predict[0].argmax()]
@@ -47,15 +54,19 @@ def make_prediction():
     confidence = y_predict[0][y_predict[0].argmax()]
     lb = '{} {:.2f}%'.format(label, confidence * 100)
 
-    return render_template('index.html', label=lb)
+    # return render_template('index.html', label=lb)
+    return jsonify({
+        "label": label,
+        # "probability": l
+    })
 
-    # return jsonify({
-    #     "name": label,
-    #     "probability": l
-    # })
+
 
 if __name__ == '__main__':
     model = load_model("food_classifer.h5")
     if model:
         print('model load success')
-    app.run(debug=True)
+    app.run(port=4500, debug=True) # host='0.0.0.0' => 외부에서 접근 가능
+
+#### model load 못해서 predict가 안됨. => h5파일 저장해서 해결
+
