@@ -1,11 +1,12 @@
-from keras.layers import Conv2D, MaxPool2D, Flatten
+# from keras.layers import Conv2D, MaxPool2D, Flatten
+from tensorflow.keras.layers import Conv2D, MaxPool2D, Flatten
 
 import tensorflow as tf
 import numpy as np
 import os
 
 # 데이터셋 로딩
-food = np.load('../result.npy')
+food = np.load('result.npy')
 np.random.shuffle(food)
 
 row = food.shape[0]
@@ -23,8 +24,8 @@ y_test = food[train_num:, 12288:]
 # reshape(총 샘플 수, 1차원 속성의 수)
 x_train = x_train.reshape(-1, 64, 64, 3) # 첫번째 인자 = -1 이였음 4822
 
-batch_size = 120 # 원래 500
-training_epochs = 5
+batch_size = 100 # 원래 500
+training_epochs = 100
 
 # sequential 딥러닝구조,층설정 / compile 정해진모델 컴파일 / fit 모델 실제 수행
 def  create_model():
@@ -59,7 +60,7 @@ def  create_model():
         tf.keras.layers.Flatten(),
         tf.keras.layers.Dropout(0.5),
 
-        tf.keras.layers.Dense(20, activation='softmax')
+        tf.keras.layers.Dense(35, activation='softmax') # 클래수 개수
     ])
 
     # 모델 실행 환경 설정
