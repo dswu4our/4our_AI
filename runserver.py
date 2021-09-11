@@ -32,18 +32,15 @@ app = Flask(__name__)
 @app.route('/camera/predict', methods=['post']) # 'get'
 def make_prediction():
     # s3_connection = get_s3_connection()
-    # image_file = request.files['image1'] # file로 보내기
+    image_file = request.files['image1'] # file로 보내기
 
     # img url로 받기
     # url = "https://img.hankyung.com/photo/202012/99.24812305.1.jpg"
-    url = request.args['img_url']
-    start = time.time()
-    res = requests.get(url)
-    # print(url)
-    # print(res)
-    print(time.time() - start)
-
-    image_file = BytesIO(res.content)
+    # url = request.args['img_url']
+    # start = time.time()
+    # res = requests.get(url)
+    # print(time.time() - start)
+    # image_file = BytesIO(res.content)
 
     if not image_file:
         #return render_template('index.html', label="no files")
