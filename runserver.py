@@ -1,7 +1,8 @@
 import io
-
+import json
 from flask import Flask, render_template, request, url_for
 from flask import jsonify
+from flask_cors import CORS
 # from connection import get_connection, get_s3_connection
 #import base64
 #import cv2
@@ -24,26 +25,31 @@ IMAGE_WIDTH = 64
 IMAGE_CHANNELS = 3
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"/camera/*": {"origins": "*"}})
 
-# @app.route('/camera')
-# def index():
-#     return render_template('index.html')
+@app.route('/camera')
+def index():
+    return render_template('index.html')
 
 @app.route('/camera/predict', methods=['post']) # 'get'
 def make_prediction():
     # s3_connection = get_s3_connection()
-    # image_file = request.files['image1'] # file로 보내기
-
+    image_file = request.files['image'] # file로 보내기
+    #default_value = '0'
+    #image_file = request.form.get(r'image', default_value)
+    #image_file = request.form['image']
+    print(image_file)
+    #print(request.files)
     # img url로 받기
     # url = "https://img.hankyung.com/photo/202012/99.24812305.1.jpg"
-    url = request.args['img_url']
-    start = time.time()
-    res = requests.get(url)
+    #url = request.args['img_url']
+    #start = time.time()
+    #res = requests.get(url)
     # print(url)
     # print(res)
-    print(time.time() - start)
+    #print(time.time() - start)
 
-    image_file = BytesIO(res.content)
+    #image_file = BytesIO(res.content)
 
     if not image_file:
         #return render_template('index.html', label="no files")
@@ -72,18 +78,32 @@ def make_prediction():
     confidence = y_predict[0][y_predict[0].argmax()]
     lb = '{} {:.2f}%'.format(label, confidence * 100)
 
+    json_obj = {
+            "label" : label,
+            "probability": lb
+            }
+    print(json_obj)
     # return render_template('index.html', label=lb)
     return jsonify({
         "label": label,
         "probability": lb
-    })
+        })
+#{
+#            'statusCode': 200,
+#            'headers': {
+#                'Access-Control-Allow-Headers': '*',
+#                'Access-Control-Allow-Origin': '*',
+#                'Access-Control-Allow-Methods': '*'
+#                },
+#            'body': json.dumps(json_obj)
+#            }
 
 
 if __name__ == '__main__':
     model = load_model("food_classifer.h5")
     if model:
         print('model load success')
-    app.run(port=4500, debug=True) # host='0.0.0.0' => 외부에서 접근 가능
+    app.run(port=5000, debug=False, host='0.0.0.0') # host='0.0.0.0' => 외부에서 접근 가능
 
 #### model load 못해서 predict가 안됨. => h5파일 저장해서 해결
 
