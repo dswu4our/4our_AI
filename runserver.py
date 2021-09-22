@@ -17,8 +17,7 @@ from io import BytesIO
 import time
 
 init_Base64 = 21
-label_dict = {0:'아보카도', 1:'바나나', 2:'블루베리', 3:'가지', 4:'생강', 5:'대파', 6:'키위', 7:'레몬', 8:'오렌지', 9:'복숭아', 10:'고구마', 11:'감자', 12:'토마토', 13:'계란', 14:'고등어', 15:'고르곤졸라치즈', 16:'김치', 17:'까망베르치즈', 18:'꼬막', 19:'느타리버섯', 20:'단감', 21:'단호박', 22:'닭고기', 23:'당근', 24:'딸기', 25:'떡', 26:'만두', 27:'명란젓', 28:'미역', 29:'밤', 30:'베이글',
-              31:'사과', 32:'새우', 33:'오징어', 34:'청양고추'}
+label_dict = {0:'가지', 1:'계란', 2:'고등어', 3:'당근', 4:'베이글', 5:'새우', 6:'양파', 7:'오징어', 8:'토마토', 9:'파프리카', 10:'피망'}
 
 IMAGE_HEIGHT = 64
 IMAGE_WIDTH = 64
@@ -26,6 +25,7 @@ IMAGE_CHANNELS = 3
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"/camera/*": {"origins": "*"}})
+
 
 @app.route('/camera')
 def index():
@@ -35,11 +35,15 @@ def index():
 def make_prediction():
     # s3_connection = get_s3_connection()
     image_file = request.files['image'] # file로 보내기
+
     #default_value = '0'
     #image_file = request.form.get(r'image', default_value)
     #image_file = request.form['image']
     print(image_file)
     #print(request.files)
+
+    # uri = request.args.get('img_url')
+
     # img url로 받기
     # url = "https://img.hankyung.com/photo/202012/99.24812305.1.jpg"
     #url = request.args['img_url']
@@ -82,6 +86,7 @@ def make_prediction():
             "label" : label,
             "probability": lb
             }
+
     print(json_obj)
     # return render_template('index.html', label=lb)
     return jsonify({
@@ -103,7 +108,9 @@ if __name__ == '__main__':
     model = load_model("food_classifer.h5")
     if model:
         print('model load success')
+
     app.run(port=5000, debug=False, host='0.0.0.0') # host='0.0.0.0' => 외부에서 접근 가능
+
 
 #### model load 못해서 predict가 안됨. => h5파일 저장해서 해결
 
