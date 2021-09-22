@@ -1,12 +1,11 @@
-# from keras.layers import Conv2D, MaxPool2D, Flatten
-from tensorflow.keras.layers import Conv2D, MaxPool2D, Flatten
+from keras.layers import Conv2D, MaxPool2D, Flatten
 
 import tensorflow as tf
 import numpy as np
 import os
 
 # 데이터셋 로딩
-food = np.load('result.npy')
+food = np.load('../result.npy')
 np.random.shuffle(food)
 
 row = food.shape[0]
@@ -24,44 +23,46 @@ y_test = food[train_num:, 12288:]
 # reshape(총 샘플 수, 1차원 속성의 수)
 x_train = x_train.reshape(-1, 64, 64, 3) # 첫번째 인자 = -1 이였음 4822
 
-batch_size = 100 # 원래 500
-training_epochs = 100
+batch_size = 120 # 원래 500
+training_epochs = 50
 
 # sequential 딥러닝구조,층설정 / compile 정해진모델 컴파일 / fit 모델 실제 수행
 def  create_model():
     model = tf.keras.models.Sequential([
-        #tf.keras.layers.Conv2D(64, 3, activation='relu', input_shape=(64, 64, 1)),
-        #tf.keras.layers.MaxPooling2D(),
-        #tf.keras.layers.Conv2D(64, 3, activation='relu'),
-        #tf.keras.layers.MaxPooling2D(),
-        #tf.keras.layers.Conv2D(128, 3, activation='relu'),
-        #tf.keras.layers.MaxPooling2D(),
-        #tf.keras.layers.Conv2D(128, 3, activation='relu'),
-        #tf.keras.layers.MaxPooling2D(),
 
+        tf.keras.layers.Dense(64, activation='relu'),
         tf.keras.layers.Dense(64, activation='sigmoid'),
+
         tf.keras.layers.Dense(64, kernel_regularizer=tf.keras.regularizers.l1(0.01)),
         tf.keras.layers.Dense(64, bias_regularizer=tf.keras.regularizers.l2(0.01)),
 
+        tf.keras.layers.Dense(64, kernel_initializer='orthogonal'),  # 커널을 랜덤한 직교행렬로 초기화
         tf.keras.layers.Dense(512, activation='relu', input_shape=(64, 64, 3)),
         tf.keras.layers.Dense(64, activation='relu'),
 
-        tf.keras.layers.Convolution2D(32,3,3,input_shape=(64,64,3),activation='relu'),
-        tf.keras.layers.MaxPooling2D(pool_size = (2,2)),
+        tf.keras.layers.Conv2D(64, 3, 3, input_shape=(64, 64, 3), activation='relu'),
+        tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
         tf.keras.layers.Flatten(),
 
+        #tf.keras.layers.Conv2D(64, 3, 3, input_shape=(64, 64, 3), activation='relu'),
+        #tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+        #tf.keras.layers.Flatten(),
+
         # Hidden layer
-        tf.keras.layers.Dense(500, activation='relu'),
+        tf.keras.layers.Dense(64, activation='relu'),
         tf.keras.layers.Dropout(0.4),
-        tf.keras.layers.Dense(250, activation='relu'),
+        tf.keras.layers.Dense(64, activation='relu'),
         tf.keras.layers.Dropout(0.3),
 
         # Flatten the results to feed into a DNN
         tf.keras.layers.Flatten(),
         tf.keras.layers.Dropout(0.5),
 
-        tf.keras.layers.Dense(35, activation='softmax') # 클래수 개수
+        tf.keras.layers.Dense(11, activation='softmax')  # 클래수 개수
     ])
+
+    # 현재 출력 형상을 포함하여 지금까지의 모델 요약표시
+    #model.summary()
 
     # 모델 실행 환경 설정
     model.compile(optimizer='adam',
